@@ -73,7 +73,7 @@ let package = Package(
                 .enableExperimentalFeature("Lifetimes"),
             ],
             linkerSettings: [
-                .linkedLibrary("c++")
+                .linkedLibrary("c++", .when(platforms: [.macOS, .iOS]))
             ]
         ),
         .target(
@@ -312,7 +312,7 @@ let package = Package(
                 .enableExperimentalFeature("Lifetimes")
             ],
             linkerSettings: [
-                .linkedLibrary("c++")
+                .linkedLibrary("c++", .when(platforms: [.macOS, .iOS]))
             ]
         ),
         .testTarget(
@@ -366,7 +366,7 @@ let package = Package(
             ],
             path: "swift/Tests/GuidedGenerationTests",
             linkerSettings: [
-                .linkedLibrary("c++")
+                .linkedLibrary("c++", .when(platforms: [.macOS, .iOS]))
             ]
         ),
         .testTarget(
@@ -381,3 +381,18 @@ let package = Package(
     swiftLanguageModes: [.v6],
     cxxLanguageStandard: .cxx17
 )
+
+// WinCatalyst (branch harmony/wincat): off Apple platforms the root takes two dependencies that
+// override the graph's resolution. swift-huggingface: upstream's FileLock `#error`s outside
+// Darwin/Glibc, so the WinCatalyst fork's harmony/wincat branch (a Windows arm) stands in; a root
+// BRANCH requirement is what lets it override swift-transformers' version range (a prerelease tag
+// is refused), and the builder points a SwiftPM mirror for the upstream URL at the fork.
+// EventSource: 1.4.1 (the version this package resolves on Apple platforms) depends on swift-nio's
+// NIOCore unconditionally, and swift-nio's Windows shim does not compile there; 1.5.1 made it
+// trait-conditional.
+#if !canImport(Darwin)
+package.dependencies += [
+    .package(url: "https://github.com/huggingface/swift-huggingface.git", branch: "harmony/wincat"),
+    .package(url: "https://github.com/mattt/EventSource.git", exact: "1.5.1"),
+]
+#endif

@@ -8,7 +8,13 @@ import CoreAI
 import CoreAILanguageModels
 import CoreAIShared
 import CoreImage
+#if canImport(Darwin)
 import Darwin
+#elseif canImport(Glibc)
+import Glibc
+#elseif canImport(ucrt)
+import ucrt
+#endif
 import Foundation
 import Tokenizers
 
