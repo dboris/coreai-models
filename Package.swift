@@ -390,7 +390,17 @@ let package = Package(
 // EventSource: 1.4.1 (the version this package resolves on Apple platforms) depends on swift-nio's
 // NIOCore unconditionally, and swift-nio's Windows shim does not compile there; 1.5.1 made it
 // trait-conditional.
+// swift-argument-parser: its Mutex takes the `os` arm wherever `os` is importable but destroys the
+// lock with pthread_mutex_destroy wherever Glibc is -- both are true on the WinCatalyst Linux SDK, and
+// the file does not compile. The root's own dependency is replaced by the WinCatalyst fork's
+// harmony/wincat branch (upstream 1.7.0 + that one line), reached through a mirror like
+// swift-huggingface.
 #if !canImport(Darwin)
+package.dependencies = package.dependencies.map { dependency in
+    guard case .sourceControl(_, let location, _) = dependency.kind,
+          location.hasSuffix("/swift-argument-parser") else { return dependency }
+    return .package(url: location, branch: "harmony/wincat")
+}
 package.dependencies += [
     .package(url: "https://github.com/huggingface/swift-huggingface.git", branch: "harmony/wincat"),
     .package(url: "https://github.com/mattt/EventSource.git", exact: "1.5.1"),

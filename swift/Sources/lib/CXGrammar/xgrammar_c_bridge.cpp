@@ -18,6 +18,7 @@
 #include <xgrammar/matcher.h>
 #include <vector>
 #include <string>
+#include <cstring>  // memcpy: libc++ and MSVC's STL include it transitively, libstdc++ does not
 
 using namespace xgrammar;
 
