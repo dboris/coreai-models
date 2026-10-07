@@ -448,7 +448,7 @@ struct LLMRunner: AsyncParsableCommand, Sendable {
         let assetLabel = try modelAssetTypeLabel(for: languageModelURL.pathExtension)
         if !CLILogger.isVerbose {
             print("\n⏳ Preparing AI asset from \(assetLabel)...", terminator: "")
-            fflush(nil)  // every stream: glibc's `stdout` is a plain mutable global, an error in Swift 6 (WinCatalyst)
+            fflush(stdout)
         }
 
         let samplingConfiguration = try parseSamplingStrategy()
@@ -1182,7 +1182,7 @@ struct LLMRunner: AsyncParsableCommand, Sendable {
             let delta = String(fullText.dropFirst(previousText.count))
             previousText = fullText
             print(delta, terminator: "")
-            fflush(nil)  // every stream: glibc's `stdout` is a plain mutable global, an error in Swift 6 (WinCatalyst)
+            fflush(stdout)
         }
         promptSpan?.end()
         extendSpan?.end()

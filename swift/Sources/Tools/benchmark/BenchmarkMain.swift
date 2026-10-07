@@ -94,7 +94,7 @@ struct LLMBenchmark: AsyncParsableCommand {
         let engineConfig = ModelConfig(bundle: bundle)
         let configData = try JSONEncoder().encode(engineConfig)
         print("\n⏳ Preparing AI asset...", terminator: "")
-        fflush(nil)  // every stream: glibc's `stdout` is a plain mutable global, an error in Swift 6 (WinCatalyst)
+        fflush(stdout)
         // Resolve chunking config with CLI flags taking precedence over metadata.json.
         // A nil result preserves the lower layers (deprecated env var, memory-based default).
         let resolvedChunkSize = chunkSize ?? bundle.language.prefillChunkSize
@@ -119,7 +119,7 @@ struct LLMBenchmark: AsyncParsableCommand {
 
         // Warmup
         print("\n⚙️  Warming up engine...", terminator: "")
-        fflush(nil)  // every stream: glibc's `stdout` is a plain mutable global, an error in Swift 6 (WinCatalyst)
+        fflush(stdout)
         let warmupStart = SuspendingClock.now
         _ = try await runTrial(engine: engine, prompt: prompt, sampling: sampling)
         let warmupSeconds = (SuspendingClock.now - warmupStart).inSeconds
